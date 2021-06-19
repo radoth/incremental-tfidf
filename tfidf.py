@@ -14,12 +14,12 @@ import datetime
 import logging
 import shutil
 
-#输出结果路径
-result_pth = r"C:\Users\tom\Desktop\tfidftry"
-#IDF字典路径
-idf_path = r"C:\Users\tom\Desktop\tfidftry\dicts"
-#输入新闻路径
-input_news_path = r"C:\Users\tom\Desktop\allnews210615\newsWithQuotes"
+# 输出结果路径
+result_pth = r"output"
+# IDF字典路径
+idf_path = r"dicts"
+# 输入新闻路径
+input_news_path = r"input"
 
 # 初始化logger
 logger = logging.getLogger(__name__)
@@ -67,20 +67,22 @@ def preprocess(text):
 
 def readText(file_pth):
     files = sorted(os.listdir(file_pth))
-    all_file = [str(i) for i in files]
-    np.save(os.path.join(output_path, "fileNum.npy"), np.array(all_file))
+    all_file = [str(i) for i in files]  # 列出文件夹中的全部文件
+    np.save(os.path.join(output_path, "fileNum.npy"),
+            np.array(all_file))  # 保存文件名
 
     whitespace_tokenized = []
     wordpiece_tokenized = []
     for i in tqdm(files):
         with open(os.path.join(file_pth, i), encoding='utf-8') as f:
             inp = json.loads(f.read())
-            data = inp['content']
-            title = inp['title']
-            data = (title+' ')*5+data
-            whitespace_tokenized.append(preprocess(data))
-            wordpiece_tokenized.append(tokenizer(data)['input_ids'])
-    return whitespace_tokenized, wordpiece_tokenized
+            data = inp['content']  # 正文
+            title = inp['title']  # 标题
+            data = (title+' ')*5+data  # 5倍标题+正文
+            whitespace_tokenized.append(preprocess(data))  # 空格分词结果保存
+            wordpiece_tokenized.append(
+                tokenizer(data)['input_ids'])  # wordpiece分词结果保存
+    return whitespace_tokenized, wordpiece_tokenized  # 返回计算结果
 
 # 空格分词法计算TF-IDF
 
