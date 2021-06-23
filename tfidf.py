@@ -19,7 +19,7 @@ result_pth = r"output"
 # IDF字典路径
 idf_path = r"dicts"
 # 输入新闻路径
-input_news_path = r"input"
+input_news_path = r"C:\Users\tom\Desktop\NewsWithQuotation"
 
 # 初始化logger
 logger = logging.getLogger(__name__)
@@ -102,11 +102,16 @@ def feature_select_whitespace(text_list):
         text_length = len(text)
         text_num = len(text_list)+word_doc["NEWS_TXTS_COUNT"]
         word_tf_idf = {}
+        square_sum=0.0
         for i in doc_frequency:
             word_tf[i] = doc_frequency[i]/text_length
             word_doc[i] += 1
             word_idf[i] = math.log(text_num/(word_doc[i]+1))
             word_tf_idf[i] = word_tf[i]*word_idf[i]
+            square_sum+=word_tf_idf[i]*word_tf_idf[i]
+        square_sum=math.sqrt(square_sum)
+        for i in word_tf_idf:
+            word_tf_idf[i]/=square_sum
         results.append(sorted(word_tf_idf.items(),
                        key=operator.itemgetter(1), reverse=True))
     return results
@@ -129,11 +134,16 @@ def feature_select_wordpiece(text_list):
         text_length = len(text)
         text_num = len(text_list)+word_doc_wordpiece["NEWS_TXTS_COUNT"]
         word_tf_idf = {}
+        square_sum=0.0
         for i in doc_frequency:
             word_tf[i] = doc_frequency[i]/text_length
             word_doc_wordpiece[i] += 1
             word_idf[i] = math.log(text_num/(word_doc_wordpiece[i]+1))
             word_tf_idf[i] = word_tf[i]*word_idf[i]
+            square_sum+=word_tf_idf[i]*word_tf_idf[i]
+        square_sum=math.sqrt(square_sum)
+        for i in word_tf_idf:
+            word_tf_idf[i]/=square_sum
         results.append(word_tf_idf)
     return results
 
@@ -144,7 +154,7 @@ def saveTopk(k, results):
     tfidf = [[j[0] for j in i[:k]] if len(
         i) >= k else [j[0] for j in i[:k]]+["null"]*(k-len(i)) for i in results]
     tfidffreq = [[j[1] for j in i[:k]] if len(
-        i) >= k else [j[0] for j in i[:k]]+["null"]*(k-len(i)) for i in results]
+        i) >= k else [j[1] for j in i[:k]]+[0.0]*(k-len(i)) for i in results]
     np.save(os.path.join(output_path, "tfidf.npy"), np.array(tfidf))
     np.save(os.path.join(output_path, "tfidffreq.npy"), np.array(tfidffreq))
 
