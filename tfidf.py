@@ -19,7 +19,7 @@ result_pth = r"output"
 # IDF字典路径
 idf_path = r"dicts"
 # 输入新闻路径
-input_news_path = r"C:\Users\tom\Desktop\NewsWithQuotation"
+input_news_file = r"C:\Users\tom\Documents\WeChat Files\wxid_d3d02v9bg7zt21\FileStorage\File\2021-06\quotes.json"
 
 # 初始化logger
 logger = logging.getLogger(__name__)
@@ -66,23 +66,22 @@ def preprocess(text):
 
 
 def readText(file_pth):
-    files = sorted(os.listdir(file_pth))
-    all_file = [str(i) for i in files]  # 列出文件夹中的全部文件
-    np.save(os.path.join(output_path, "fileNum.npy"),
-            np.array(all_file))  # 保存文件名
-
     whitespace_tokenized = []
     wordpiece_tokenized = []
-    for i in tqdm(files):
-        with open(os.path.join(file_pth, i), encoding='utf-8') as f:
-            inp = json.loads(f.read())
+
+    with open(file_pth, encoding='utf-8') as f:
+        line = f.readline()
+        while line != "":
+            inp = json.loads(line)
             data = inp['content']  # 正文
             title = inp['title']  # 标题
             data = (title+' ')*5+data  # 5倍标题+正文
             whitespace_tokenized.append(preprocess(data))  # 空格分词结果保存
             wordpiece_tokenized.append(
                 tokenizer(data)['input_ids'])  # wordpiece分词结果保存
+            line = f.readline()
     return whitespace_tokenized, wordpiece_tokenized  # 返回计算结果
+
 
 # 空格分词法计算TF-IDF
 
@@ -102,16 +101,16 @@ def feature_select_whitespace(text_list):
         text_length = len(text)
         text_num = len(text_list)+word_doc["NEWS_TXTS_COUNT"]
         word_tf_idf = {}
-        square_sum=0.0
+        square_sum = 0.0
         for i in doc_frequency:
             word_tf[i] = doc_frequency[i]/text_length
             word_doc[i] += 1
             word_idf[i] = math.log(text_num/(word_doc[i]+1))
             word_tf_idf[i] = word_tf[i]*word_idf[i]
-            square_sum+=word_tf_idf[i]*word_tf_idf[i]
-        square_sum=math.sqrt(square_sum)
+            square_sum += word_tf_idf[i]*word_tf_idf[i]
+        square_sum = math.sqrt(square_sum)
         for i in word_tf_idf:
-            word_tf_idf[i]/=square_sum
+            word_tf_idf[i] /= square_sum
         results.append(sorted(word_tf_idf.items(),
                        key=operator.itemgetter(1), reverse=True))
     return results
@@ -134,16 +133,16 @@ def feature_select_wordpiece(text_list):
         text_length = len(text)
         text_num = len(text_list)+word_doc_wordpiece["NEWS_TXTS_COUNT"]
         word_tf_idf = {}
-        square_sum=0.0
+        square_sum = 0.0
         for i in doc_frequency:
             word_tf[i] = doc_frequency[i]/text_length
             word_doc_wordpiece[i] += 1
             word_idf[i] = math.log(text_num/(word_doc_wordpiece[i]+1))
             word_tf_idf[i] = word_tf[i]*word_idf[i]
-            square_sum+=word_tf_idf[i]*word_tf_idf[i]
-        square_sum=math.sqrt(square_sum)
+            square_sum += word_tf_idf[i]*word_tf_idf[i]
+        square_sum = math.sqrt(square_sum)
         for i in word_tf_idf:
-            word_tf_idf[i]/=square_sum
+            word_tf_idf[i] /= square_sum
         results.append(word_tf_idf)
     return results
 
@@ -186,7 +185,7 @@ def saveIDFDict(whitespace_tokenized, wordpiece_tokenized):
 
 
 logger.info("开始读取文本并分词")
-whitespace_tokenized, wordpiece_tokenized = readText(input_news_path)
+whitespace_tokenized, wordpiece_tokenized = readText(input_news_file)
 logger.info("开始使用空格分词法增量计算TF-IDF")
 whitespace_result = feature_select_whitespace(whitespace_tokenized)
 logger.info("开始使用WordPiece分词法增量计算TF-IDF")
