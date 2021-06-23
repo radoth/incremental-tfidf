@@ -19,7 +19,7 @@ result_pth = r"output"
 # IDF字典路径
 idf_path = r"dicts"
 # 输入新闻路径
-input_news_file = r"C:\Users\tom\Documents\WeChat Files\wxid_d3d02v9bg7zt21\FileStorage\File\2021-06\quotes.json"
+input_news_file = r"quotes.json"
 
 # 初始化logger
 logger = logging.getLogger(__name__)
