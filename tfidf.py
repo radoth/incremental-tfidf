@@ -14,11 +14,11 @@ import datetime
 import logging
 import shutil
 
-# 输出结果路径
+# 输出结果路径，每次运行新建一个目录
 result_pth = r"output"
-# IDF字典路径
+# IDF字典路径，每次运行后程序会更新IDF字典
 idf_path = r"dicts"
-# 输入新闻路径
+# 输入新闻路径，输入单个json文件
 input_news_file = r"quotes.json"
 
 # 初始化logger
